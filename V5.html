@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Port Cargo Delivery System</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #16a085;
+            --light-bg: #f9f9f9;
+            --border-color: #ddd;
+            --error-color: #e74c3c;
+            --success-color: #27ae60;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-color);
+            margin-bottom: 30px;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .form-group {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .shift-result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #eaf7fd;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            margin-right: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .tab.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .shift-timings {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .shift-timings h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .shift-timings ul {
+            margin-bottom: 0;
+        }
+        
+        .note {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #2c3e50;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .rate-table {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .rate-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .rate-table th, .rate-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .rate-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Port Cargo Delivery System</h1>
+    
+    <div class="tab-container">
+        <div class="tab active" id="cargoTab" onclick="switchTab('cargo-info')">Cargo Information</div>
+        <div class="tab disabled" id="deliveryTab" onclick="checkTabAccess('delivery-details')">Delivery Details</div>
+        <div class="tab disabled" id="storageTab" onclick="checkTabAccess('storage-details')">Storage Details</div>
+    </div>
+    
+    <div id="cargo-info" class="tab-content">
+        <div class="form-section">
+            <h2>Cargo Information</h2>
+            
+            <div class="form-group">
+                <label for="port">Select Port:</label>
+                <select id="port" required>
+                    <option value="">-- Select Port --</option>
+                    <option value="kandla">Kandla</option>
+                    <option value="mumbai">Mumbai</option>
+                    <option value="nhava_sheva">Nhava Sheva (Jawaharlal Nehru Port)</option>
+                    <option value="mormugao">Mormugao</option>
+                    <option value="new_mangalore">New Mangalore</option>
+                    <option value="cochin">Cochin</option>
+                    <option value="chennai">Chennai</option>
+                    <option value="ennore">Ennore (Kamarajar)</option>
+                    <option value="tuticorin">V.O. Chidambaranar (Tuticorin)</option>
+                    <option value="visakhapatnam">Visakhapatnam</option>
+                    <option value="paradip">Paradip</option>
+                    <option value="haldia">Haldia (Kolkata)</option>
+                    <option value="port_blair">Port Blair</option>
+                    <option value="other">Other</option>
+                </select>
+                <div id="portError" class="error-message">Please select a port</div>
+            </div>
+            
+            <div class="form-group" id="otherPortGroup" style="display:none;">
+                <label for="otherPort">Specify Port Name:</label>
+                <input type="text" id="otherPort">
+                <div id="otherPortError" class="error-message">Please enter port name</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="cargoRef">Cargo Reference:</label>
+                <input type="text" id="cargoRef" placeholder="e.g., AVL-2025-06-001" required>
+                <div id="cargoRefError" class="error-message">Please enter cargo reference</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="cargoType">Cargo Type:</label>
+                <select id="cargoType" required>
+                    <option value="">-- Select Cargo Type --</option>
+                    <option value="tanker">Tankers (Liquid)</option>
+                    <option value="container">Container Vessels</option>
+                    <option value="roro">Ro-Ro Vessels</option>
+                    <option value="breakbulk">Break-bulk Cargo</option>
+                    <option value="other">Other Vessel Types</option>
+                </select>
+                <div id="cargoTypeError" class="error-message">Please select cargo type</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="deliveryType">Delivery Type:</label>
+                <select id="deliveryType" required>
+                    <option value="">-- Select Delivery Type --</option>
+                    <option value="direct">Direct Delivery</option>
+                    <option value="stack">Stack Delivery</option>
+                </select>
+                <div id="deliveryTypeError" class="error-message">Please select delivery type</div>
+            </div>
+            
+            <button type="button" onclick="validateCargoInfo()">Continue to Delivery Details</button>
+        </div>
+    </div>
+    
+    <div id="delivery-details" class="tab-content" style="display:none;">
+        <div class="form-section" id="directDeliveryFields" style="display:none;">
+            <h2>Direct Delivery Details</h2>
+            
+            <div class="form-group">
+                <label for="landingDateTime">Landing Date/Time:</label>
+                <input type="datetime-local" id="landingDateTime" required>
+                <div id="landingTimeError" class="error-message">Please enter a valid landing date and time in the future</div>
+            </div>
+            
+            <div class="form-group">
+                <button type="button" onclick="calculateShifts()">Calculate 3 Free Shifts</button>
+                <div id="shiftResult" class="shift-result"></div>
+            </div>
+        </div>
+        
+        <div class="form-section" id="stackDeliveryFields" style="display:none;">
+            <h2>Stack Delivery Details</h2>
+            
+            <div class="form-group">
+                <label for="vesselCompletionTime">Vessel Completion Time and Date:</label>
+                <input type="datetime-local" id="vesselCompletionTime" required>
+                <div id="vesselCompletionError" class="error-message">Please enter a valid vessel completion date and time in the future</div>
+            </div>
+            
+            <div class="form-group">
+                <button type="button" onclick="calculateStackFreeShifts()">Calculate 7 Days Free Shifts</button>
+                <div id="stackShiftResult" class="shift-result"></div>
+            </div>
+            
+            <div class="form-group">
+                <div class="note"><strong>Note:</strong> Storage for up to 7 days is free for stack delivery. End date and cost calculated in the Storage Details tab.</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Storage End Date/Time:</label>
+                <div id="storageEndResult" class="shift-result"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="stackLocation">Preferred Stack Location:</label>
+                <select id="stackLocation">
+                    <option value="">-- Select Stack Location --</option>
+                    <option value="area_1">Area 1</option>
+                    <option value="area_2">Area 2</option>
+                    <option value="area_3">Area 3</option>
+                    <option value="area_4">Area 4</option>
+                    <option value="section_iii">Section III</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <button type="button" onclick="validateDeliveryDetails()">Continue to Storage Details</button>
+        </div>
+    </div>
+    
+    <div id="storage-details" class="tab-content" style="display:none;">
+        <div class="form-section">
+            <h2>Storage Details</h2>
+            
+            <div class="form-group">
+                <label for="storageType">Storage Type:</label>
+                <select id="storageType" required>
+                    <option value="">-- Select Storage Type --</option>
+                    <option value="open_unpaved">Open Space Unpaved</option>
+                    <option value="open_paved">Open Space Paved</option>
+                    <option value="covered">Covered Space</option>
+                </select>
+                <div id="storageTypeError" class="error-message">Please select storage type</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="containerSize">Container Size:</label>
+                <select id="containerSize" required>
+                    <option value="">-- Select Container Size --</option>
+                    <option value="20ft">20 Feet</option>
+                    <option value="40ft">40 Feet</option>
+                </select>
+                <div id="containerSizeError" class="error-message">Please select container size</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="numContainers">Number of Base Containers:</label>
+                <input type="number" id="numContainers" min="1" step="1" required>
+                <div id="numContainersError" class="error-message">Please enter a valid number of containers (1 or more)</div>
+                <div class="note"><strong>Note:</strong> Only 4 layers can be stacked above each base container.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="estimatedStorageEnd">Estimated Storage End Date/Time:</label>
+                <input type="datetime-local" id="estimatedStorageEnd" required>
+                <div id="estimatedStorageEndError" class="error-message">Please enter a valid estimated storage end date in the future</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Estimated Storage Cost (Rs.):</label>
+                <div id="storageCostResult" class="shift-result"></div>
+            </div>
+            
+            <div class="form-group">
+                <button type="button" onclick="submitForm()">Submit Cargo Details</button>
+            </div>
+            
+            <h3>Storage Rate Information (w.e.f. 20.01.2025)</h3>
+            <div class="rate-table">
+                <p>Indexed Rates for Immediate Cargo Storage on Vessel to Vessel Basis:</p>
+                <table>
+                    <tr>
+                        <th>Period of Occupation</th>
+                        <th>Open Space Unpaved</th>
+                        <th>Open Space Paved</th>
+                        <th>Covered Space</th>
+                    </tr>
+                    <tr>
+                        <td>0-60 days</td>
+                        <td>406</td>
+                        <td>767</td>
+                        <td>1213</td>
+                    </tr>
+                    <tr>
+                        <td>61-90 days</td>
+                        <td>446</td>
+                        <td>845</td>
+                        <td>1334</td>
+                    </tr>
+                    <tr>
+                        <td>91-120 days</td>
+                        <td>506</td>
+                        <td>959</td>
+                        <td>1516</td>
+                    </tr>
+                    <tr>
+                        <td>Beyond 120 days</td>
+                        <td>607</td>
+                        <td>1152</td>
+                        <td>1820</td>
+                    </tr>
+                </table>
+                <div class="note"><strong>Note:</strong> Rates are in Rs. per 10 square meters per day.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Container sizes in square meters (rounded)
+        const CONTAINER_SIZES = {
+            '20ft': 20, // Rounded from 14.86 m²
+            '40ft': 30  // Rounded from 29.72 m²
+        };
+
+        // Track tab validation status
+        let cargoInfoValid = false;
+        let deliveryDetailsValid = false;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const now = new Date('2025-07-04T10:40:00+05:30'); // Set to current date/time (July 4, 2025, 10:40 AM IST)
+                const minDateTime = now.toISOString().slice(0, 16); // For min attribute
+                const landingDateTime = document.getElementById('landingDateTime');
+                const vesselCompletionTime = document.getElementById('vesselCompletionTime');
+                const estimatedStorageEnd = document.getElementById('estimatedStorageEnd');
+                const numContainers = document.getElementById('numContainers');
+                const containerSize = document.getElementById('containerSize');
+
+                if (landingDateTime) {
+                    landingDateTime.min = minDateTime;
+                    landingDateTime.value = now.toISOString().slice(0, 16);
+                } else {
+                    throw new Error('Landing date/time input not found');
+                }
+                if (vesselCompletionTime) {
+                    vesselCompletionTime.min = minDateTime;
+                    vesselCompletionTime.value = now.toISOString().slice(0, 16);
+                } else {
+                    throw new Error('Vessel completion time input not found');
+                }
+                if (estimatedStorageEnd) {
+                    const defaultEndDate = new Date(now);
+                    defaultEndDate.setDate(now.getDate() + 7);
+                    estimatedStorageEnd.min = minDateTime;
+                    estimatedStorageEnd.value = defaultEndDate.toISOString().slice(0, 16);
+                } else {
+                    throw new Error('Estimated storage end date input not found');
+                }
+                if (numContainers) {
+                    numContainers.value = 1; // Default to 1 container
+                } else {
+                    throw new Error('Number of containers input not found');
+                }
+                if (containerSize) {
+                    containerSize.value = '40ft'; // Default to 40ft
+                } else {
+                    throw new Error('Container size input not found');
+                }
+                calculateStorageEndDate();
+                calculateStorageCost();
+            } catch (error) {
+                console.error('Initialization error:', error.message);
+                alert('An error occurred while initializing the form: ' + error.message);
+            }
+        });
+        
+        // Tab switching
+        function switchTab(tabId) {
+            try {
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.style.display = 'block';
+                    document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
+                } else {
+                    throw new Error(`Tab content for ${tabId} not found`);
+                }
+            } catch (error) {
+                console.error('Tab switching error:', error.message);
+                alert('An error occurred while switching tabs: ' + error.message);
+            }
+        }
+        
+        // Check tab access
+        function checkTabAccess(tabId) {
+            try {
+                if (tabId === 'delivery-details' && !cargoInfoValid) {
+                    alert('Please complete and validate Cargo Information first.');
+                    return;
+                }
+                if (tabId === 'storage-details' && !deliveryDetailsValid) {
+                    alert('Please complete and validate Delivery Details first.');
+                    return;
+                }
+                switchTab(tabId);
+            } catch (error) {
+                console.error('Tab access error:', error.message);
+                alert('An error occurred while accessing the tab: ' + error.message);
+            }
+        }
+        
+        // Show/hide "Other Port" field
+        document.getElementById('port').addEventListener('change', function() {
+            try {
+                const otherPortGroup = document.getElementById('otherPortGroup');
+                if (otherPortGroup) {
+                    otherPortGroup.style.display = this.value === 'other' ? 'block' : 'none';
+                } else {
+                    throw new Error('Other port group not found');
+                }
+            } catch (error) {
+                console.error('Port change error:', error.message);
+                alert('An error occurred while updating the port field: ' + error.message);
+            }
+        });
+        
+        // Show/hide delivery type fields
+        document.getElementById('deliveryType').addEventListener('change', function() {
+            try {
+                const deliveryType = this.value;
+                const directFields = document.getElementById('directDeliveryFields');
+                const stackFields = document.getElementById('stackDeliveryFields');
+                if (directFields && stackFields) {
+                    directFields.style.display = deliveryType === 'direct' ? 'block' : 'none';
+                    stackFields.style.display = deliveryType === 'stack' ? 'block' : 'none';
+                    if (deliveryType === 'stack') {
+                        calculateStorageEndDate();
+                    }
+                } else {
+                    throw new Error('Delivery fields not found');
+                }
+            } catch (error) {
+                console.error('Delivery type change error:', error.message);
+                alert('An error occurred while updating delivery fields: ' + error.message);
+            }
+        });
+        
+        // Validate cargo info before proceeding
+        function validateCargoInfo() {
+            let isValid = true;
+            try {
+                const port = document.getElementById('port').value;
+                const otherPort = document.getElementById('otherPort');
+                const cargoRef = document.getElementById('cargoRef');
+                const cargoType = document.getElementById('cargoType');
+                const deliveryType = document.getElementById('deliveryType');
+
+                if (!port) {
+                    document.getElementById('portError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('portError').style.display = 'none';
+                    if (port === 'other' && !otherPort.value) {
+                        document.getElementById('otherPortError').style.display = 'block';
+                        isValid = false;
+                    } else {
+                        document.getElementById('otherPortError').style.display = 'none';
+                    }
+                }
+
+                if (!cargoRef.value) {
+                    document.getElementById('cargoRefError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('cargoRefError').style.display = 'none';
+                }
+
+                if (!cargoType.value) {
+                    document.getElementById('cargoTypeError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('cargoTypeError').style.display = 'none';
+                }
+
+                if (!deliveryType.value) {
+                    document.getElementById('deliveryTypeError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('deliveryTypeError').style.display = 'none';
+                }
+
+                if (isValid) {
+                    cargoInfoValid = true;
+                    document.getElementById('deliveryTab').classList.remove('disabled');
+                    switchTab('delivery-details');
+                }
+            } catch (error) {
+                console.error('Validation error:', error.message);
+                alert('An error occurred during validation: ' + error.message);
+            }
+        }
+        
+        // Validate delivery details before proceeding
+        function validateDeliveryDetails() {
+            let isValid = true;
+            try {
+                const deliveryType = document.getElementById('deliveryType').value;
+                const now = new Date('2025-07-04T10:40:00+05:30');
+                if (deliveryType === 'direct') {
+                    const landingDateTime = document.getElementById('landingDateTime');
+                    if (!landingDateTime.value) {
+                        document.getElementById('landingTimeError').style.display = 'block';
+                        isValid = false;
+                    } else {
+                        const landingDate = new Date(landingDateTime.value);
+                        if (isNaN(landingDate.getTime()) || landingDate < now) {
+                            document.getElementById('landingTimeError').style.display = 'block';
+                            isValid = false;
+                        } else {
+                            document.getElementById('landingTimeError').style.display = 'none';
+                            const landingDateStr = landingDate.toISOString().split('T')[0];
+                            if (isHoliday(landingDateStr)) {
+                                alert('Warning: The selected landing date is a gazetted holiday. Operations may be affected.');
+                            }
+                        }
+                    }
+                } else if (deliveryType === 'stack') {
+                    const vesselCompletionTime = document.getElementById('vesselCompletionTime');
+                    if (!vesselCompletionTime.value) {
+                        document.getElementById('vesselCompletionError').style.display = 'block';
+                        isValid = false;
+                    } else {
+                        const completionDate = new Date(vesselCompletionTime.value);
+                        if (isNaN(completionDate.getTime()) || completionDate < now) {
+                            document.getElementById('vesselCompletionError').style.display = 'block';
+                            isValid = false;
+                        } else {
+                            document.getElementById('vesselCompletionError').style.display = 'none';
+                            const completionDateStr = completionDate.toISOString().split('T')[0];
+                            if (isHoliday(completionDateStr)) {
+                                alert('Warning: The selected vessel completion date is a gazetted holiday. Operations may be affected.');
+                            }
+                        }
+                    }
+                }
+
+                if (isValid) {
+                    deliveryDetailsValid = true;
+                    document.getElementById('storageTab').classList.remove('disabled');
+                    switchTab('storage-details');
+                }
+            } catch (error) {
+                console.error('Delivery validation error:', error.message);
+                alert('An error occurred during delivery details validation: ' + error.message);
+            }
+        }
+        
+        // Holiday list for 2025
+        const holidays2025 = [
+            "2025-01-14", "2025-01-26", "2025-03-31", "2025-04-10", "2025-04-18",
+            "2025-05-12", "2025-06-07", "2025-07-06", "2025-08-15", "2025-08-27",
+            "2025-09-05", "2025-10-01", "2025-10-02", "2025-10-20", "2025-11-05",
+            "2025-12-25"
+        ];
+
+        function isHoliday(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) {
+                    throw new Error('Invalid date format for holiday check');
+                }
+                return holidays2025.includes(dateStr);
+            } catch (error) {
+                console.error('Holiday check error:', error.message);
+                return false;
+            }
+        }
+
+        function getNextWorkingDay(date) {
+            try {
+                let nextDate = new Date(date);
+                let attempts = 0;
+                const maxAttempts = 365;
+                do {
+                    nextDate.setDate(nextDate.getDate() + 1);
+                    const nextDateStr = nextDate.toISOString().split('T')[0];
+                    if (!isHoliday(nextDateStr) && nextDate.getDay() !== 0 && nextDate.getDay() !== 6) {
+                        return nextDate;
+                    }
+                    attempts++;
+                } while (attempts < maxAttempts);
+                throw new Error('Unable to find next working day within reasonable time');
+            } catch (error) {
+                console.error('Next working day error:', error.message);
+                throw error;
+            }
+        }
+
+        function calculateStorageEndDate() {
+            try {
+                const vesselCompletionTime = document.getElementById('vesselCompletionTime');
+                const storageEndResult = document.getElementById('storageEndResult');
+                if (!vesselCompletionTime || !storageEndResult) {
+                    throw new Error('Required elements not found');
+                }
+                if (!vesselCompletionTime.value) {
+                    document.getElementById('vesselCompletionError').style.display = 'block';
+                    storageEndResult.innerHTML = '';
+                    return;
+                }
+                const completionDate = new Date(vesselCompletionTime.value);
+                const now = new Date('2025-07-04T10:40:00+05:30');
+                if (isNaN(completionDate.getTime()) || completionDate < now) {
+                    document.getElementById('vesselCompletionError').style.display = 'block';
+                    storageEndResult.innerHTML = '';
+                    return;
+                }
+                document.getElementById('vesselCompletionError').style.display = 'none';
+
+                let endDate = new Date(completionDate);
+                endDate.setDate(completionDate.getDate() + 7);
+
+                let endDateStr = endDate.toISOString().split('T')[0];
+                let endTimeStr = endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                while (isHoliday(endDateStr) || endDate.getDay() === 0 || endDate.getDay() === 6) {
+                    endDate = getNextWorkingDay(endDate);
+                    endDateStr = endDate.toISOString().split('T')[0];
+                    endTimeStr = endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+
+                storageEndResult.innerHTML = `<p>Storage ends on: <strong>${endDateStr} at ${endTimeStr}</strong></p>`;
+            } catch (error) {
+                console.error('Storage end date calculation error:', error.message);
+                const storageEndResult = document.getElementById('storageEndResult');
+                if (storageEndResult) {
+                    storageEndResult.innerHTML = `<p class="error-message">Error calculating storage end date: ${error.message}</p>`;
+                }
+            }
+        }
+
+        // Add event listeners for vessel completion time, storage type, container size, number of containers, and storage end date changes
+        document.getElementById('vesselCompletionTime').addEventListener('change', function() {
+            calculateStorageEndDate();
+            calculateStorageCost();
+            calculateStackFreeShifts();
+        });
+        document.getElementById('storageType').addEventListener('change', calculateStorageCost);
+        document.getElementById('containerSize').addEventListener('change', calculateStorageCost);
+        document.getElementById('numContainers').addEventListener('change', calculateStorageCost);
+        document.getElementById('estimatedStorageEnd').addEventListener('change', calculateStorageCost);
+
+        // Storage rates in Rs. per 10 square meters per day (effective 20.01.2025)
+        const storageRates = {
+            'open_unpaved': [406, 446, 506, 607], // 0-60, 61-90, 91-120, >120 days
+            'open_paved': [767, 845, 959, 1152],
+            'covered': [1213, 1334, 1516, 1820]
+        };
+
+        // Calculate storage cost with minimum 100 m²
+        function calculateStorageCost() {
+            try {
+                const vesselCompletionTime = document.getElementById('vesselCompletionTime');
+                const estimatedStorageEnd = document.getElementById('estimatedStorageEnd');
+                const storageType = document.getElementById('storageType');
+                const containerSize = document.getElementById('containerSize');
+                const numContainers = document.getElementById('numContainers');
+                const storageCostResult = document.getElementById('storageCostResult');
+                if (!vesselCompletionTime || !estimatedStorageEnd || !storageType || !containerSize || !numContainers || !storageCostResult) {
+                    throw new Error('Required elements not found');
+                }
+                if (!vesselCompletionTime.value) {
+                    document.getElementById('vesselCompletionError').style.display = 'block';
+                    storageCostResult.innerHTML = '';
+                    return;
+                }
+                if (!estimatedStorageEnd.value) {
+                    document.getElementById('estimatedStorageEndError').style.display = 'block';
+                    storageCostResult.innerHTML = '';
+                    return;
+                }
+                if (!storageType.value) {
+                    document.getElementById('storageTypeError').style.display = 'block';
+                    storageCostResult.innerHTML = '';
+                    return;
+                }
+                if (!containerSize.value) {
+                    document.getElementById('containerSizeError').style.display = 'block';
+                    storageCostResult.innerHTML = '';
+                    return;
+                }
+                if (!numContainers.value || numContainers.value < 1) {
+                    document.getElementById('numContainersError').style.display = 'block';
+                    storageCostResult.innerHTML = '';
+                    return;
+                }
+                const now = new Date('2025-07-04T10:40:00+05:30');
+                const startDate = new Date(vesselCompletionTime.value);
+                const endDate = new Date(estimatedStorageEnd.value);
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate < now || endDate < now) {
+                    throw new Error('Invalid or past date/time input');
+                }
+                if (endDate < startDate) {
+                    throw new Error('Estimated storage end date must be after vessel completion date');
+                }
+
+                document.getElementById('vesselCompletionError').style.display = 'none';
+                document.getElementById('estimatedStorageEndError').style.display = 'none';
+                document.getElementById('storageTypeError').style.display = 'none';
+                document.getElementById('containerSizeError').style.display = 'none';
+                document.getElementById('numContainersError').style.display = 'none';
+
+                let totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+                let chargeableDays = totalDays > 7 ? totalDays - 7 : 0;
+
+                const selectedStorageType = storageType.value;
+                const selectedContainerSize = containerSize.value;
+                const numBaseContainers = parseInt(numContainers.value);
+                let rateIndex = 0;
+                if (chargeableDays > 120) rateIndex = 3;
+                else if (chargeableDays > 90) rateIndex = 2;
+                else if (chargeableDays > 60) rateIndex = 1;
+
+                const containerArea = CONTAINER_SIZES[selectedContainerSize];
+                const actualArea = containerArea * numBaseContainers;
+                const totalArea = Math.max(actualArea, 100);
+                const ratePerTenSquareMetersPerDay = storageRates[selectedStorageType][rateIndex];
+                const cost = chargeableDays > 0 ? (totalArea / 10) * ratePerTenSquareMetersPerDay * chargeableDays : 0;
+                const areaNote = actualArea < 100 ? ` (billed as minimum 100 m²)` : '';
+
+                storageCostResult.innerHTML = `<p>Estimated cost: <strong>Rs. ${Math.round(cost).toLocaleString()}</strong> (for ${chargeableDays} chargeable days, ${numBaseContainers} ${selectedContainerSize} base container${numBaseContainers > 1 ? 's' : ''}${areaNote})</p>`;
+            } catch (error) {
+                console.error('Storage cost calculation error:', error.message);
+                const storageCostResult = document.getElementById('storageCostResult');
+                if (storageCostResult) {
+                    storageCostResult.innerHTML = `<p class="error-message">Error calculating storage cost: ${error.message}</p>`;
+                }
+            }
+        }
+
+        // Calculate 3 free shifts for direct delivery
+        function calculateShifts() {
+            try {
+                const landingTimeInput = document.getElementById('landingDateTime').value;
+                const shiftResult = document.getElementById('shiftResult');
+                const now = new Date('2025-07-04T10:40:00+05:30');
+                
+                if (!shiftResult) {
+                    throw new Error('Shift result container not found');
+                }
+                if (!landingTimeInput) {
+                    document.getElementById('landingTimeError').style.display = 'block';
+                    shiftResult.innerHTML = `<p class="error-message">Please enter a landing date and time</p>`;
+                    throw new Error('Landing time is required');
+                }
+                const landingTime = new Date(landingTimeInput);
+                if (isNaN(landingTime.getTime())) {
+                    document.getElementById('landingTimeError').style.display = 'block';
+                    shiftResult.innerHTML = `<p class="error-message">Invalid landing date/time format</p>`;
+                    throw new Error('Invalid landing time format');
+                }
+                if (landingTime < now) {
+                    document.getElementById('landingTimeError').style.display = 'block';
+                    shiftResult.innerHTML = `<p class="error-message">Landing date/time cannot be in the past</p>`;
+                    throw new Error('Landing time cannot be in the past');
+                }
+
+                document.getElementById('landingTimeError').style.display = 'none';
+
+                const shifts = [
+                    { name: "Shift 1", start: 6, end: 14, label: "6AM - 2PM" },
+                    { name: "Shift 2", start: 14, end: 22, label: "2PM - 10PM" },
+                    { name: "Shift 3", start: 22, end: 6, label: "10PM - 6AM" }
+                ];
+
+                const landingHour = landingTime.getHours();
+                let currentShiftIndex = -1;
+
+                if (landingHour >= 6 && landingHour < 14) {
+                    currentShiftIndex = 0;
+                } else if (landingHour >= 14 && landingHour < 22) {
+                    currentShiftIndex = 1;
+                } else {
+                    currentShiftIndex = 2;
+                }
+
+                const freeShifts = [];
+                for (let i = 1; i <= 3; i++) {
+                    const nextShiftIndex = (currentShiftIndex + i) % 3;
+                    const shift = shifts[nextShiftIndex];
+
+                    const shiftDate = new Date(landingTime);
+
+                    if (nextShiftIndex === 2 && (landingHour >= 22 || landingHour < 6)) {
+                        shiftDate.setDate(shiftDate.getDate() + Math.floor((i + 2) / 3));
+                    } else if (nextShiftIndex < currentShiftIndex) {
+                        shiftDate.setDate(shiftDate.getDate() + 1);
+                    }
+
+                    let shiftDateStr = shiftDate.toISOString().split('T')[0];
+                    if (isHoliday(shiftDateStr) || shiftDate.getDay() === 0 || shiftDate.getDay() === 6) {
+                        shiftDate = getNextWorkingDay(shiftDate);
+                        shiftDateStr = shiftDate.toISOString().split('T')[0];
+                    }
+
+                    shiftDate.setHours(shift.start, 0, 0, 0);
+
+                    freeShifts.push({
+                        name: shift.name,
+                        label: shift.label,
+                        startTime: new Date(shiftDate),
+                        endTime: new Date(shiftDate.getTime() + (shift.end > shift.start ? 
+                            (shift.end - shift.start) : (24 - shift.start + shift.end)) * 60 * 60 * 1000)
+                    });
+                }
+
+                let resultHTML = `
+                    <div class="shift-timings">
+                        <h4>Standard Shift Timings:</h4>
+                        <ul>
+                            ${shifts.map(s => `<li><strong>${s.name}:</strong> ${s.label}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <h3>Landing Time Analysis</h3>
+                    <p>Your cargo arrives during: <strong>${shifts[currentShiftIndex].label}</strong></p>
+                    <p>The next 3 free shifts are:</p>
+                    <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                        <tr>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Shift</th>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Timing</th>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Date</th>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Status</th>
+                        </tr>
+                `;
+
+                freeShifts.forEach((shift, index) => {
+                    const dateStr = shift.startTime.toISOString().split('T')[0];
+                    const timeRange = `${shift.startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${shift.endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    const priority = index === 0 ? "First Priority" : index === 1 ? "Secondary Option" : "Last Resort";
+                    const priorityColor = index === 0 ? "color:#27ae60;" : index === 1 ? "color:#f39c12;" : "color:#e74c3c;";
+                    const isHolidayFlag = isHoliday(dateStr) ? " (Holiday)" : "";
+
+                    resultHTML += `
+                        <tr>
+                            <td style="padding:8px; border-bottom:1px solid #ddd;">${shift.name}</td>
+                            <td style="padding:8px; border-bottom:1px solid #ddd;">${shift.label}</td>
+                            <td style="padding:8px; border-bottom:1px solid #ddd;">${dateStr}${isHolidayFlag}</td>
+                            <td style="padding:8px; border-bottom:1px solid #ddd; ${priorityColor}">
+                                <strong>${priority}</strong>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                resultHTML += `
+                    </table>
+                    <div style="margin-top:15px; padding:10px; background:#f8f9fa; border-radius:6px;">
+                        <p style="margin:0; font-size:14px;">
+                            <strong>Note:</strong> The arriving shift (${shifts[currentShiftIndex].label}) is not counted. 
+                            The next 3 shifts are free for delivery scheduling.
+                        </p>
+                    </div>
+                `;
+
+                shiftResult.innerHTML = resultHTML;
+            } catch (error) {
+                console.error('Shift calculation error:', error.message);
+                const shiftResult = document.getElementById('shiftResult');
+                if (shiftResult) {
+                    shiftResult.innerHTML = `<p class="error-message">Error calculating shifts: ${error.message}</p>`;
+                }
+            }
+        }
+
+        // Calculate 7 days (21 shifts) free for stack delivery
+        function calculateStackFreeShifts() {
+            try {
+                const vesselCompletionTimeInput = document.getElementById('vesselCompletionTime').value;
+                const stackShiftResult = document.getElementById('stackShiftResult');
+                const now = new Date('2025-07-04T10:40:00+05:30');
+
+                if (!stackShiftResult) {
+                    throw new Error('Stack shift result container not found');
+                }
+                if (!vesselCompletionTimeInput) {
+                    document.getElementById('vesselCompletionError').style.display = 'block';
+                    stackShiftResult.innerHTML = `<p class="error-message">Please enter a vessel completion date and time</p>`;
+                    throw new Error('Vessel completion time is required');
+                }
+                const vesselCompletionTime = new Date(vesselCompletionTimeInput);
+                if (isNaN(vesselCompletionTime.getTime())) {
+                    document.getElementById('vesselCompletionError').style.display = 'block';
+                    stackShiftResult.innerHTML = `<p class="error-message">Invalid vessel completion date/time format</p>`;
+                    throw new Error('Invalid vessel completion time format');
+                }
+                if (vesselCompletionTime < now) {
+                    document.getElementById('vesselCompletionError').style.display = 'block';
+                    stackShiftResult.innerHTML = `<p class="error-message">Vessel completion date/time cannot be in the past</p>`;
+                    throw new Error('Vessel completion time cannot be in the past');
+                }
+
+                document.getElementById('vesselCompletionError').style.display = 'none';
+
+                const shifts = [
+                    { name: "Shift 1", start: 6, end: 14, label: "6AM - 2PM" },
+                    { name: "Shift 2", start: 14, end: 22, label: "2PM - 10PM" },
+                    { name: "Shift 3", start: 22, end: 6, label: "10PM - 6AM" }
+                ];
+
+                const completionHour = vesselCompletionTime.getHours();
+                let currentShiftIndex = -1;
+
+                if (completionHour >= 6 && completionHour < 14) {
+                    currentShiftIndex = 0;
+                } else if (completionHour >= 14 && completionHour < 22) {
+                    currentShiftIndex = 1;
+                } else {
+                    currentShiftIndex = 2;
+                }
+
+                const freeShifts = [];
+                let shiftDate = new Date(vesselCompletionTime);
+                let shiftCount = 0;
+
+                while (freeShifts.length < 21) {
+                    const nextShiftIndex = (currentShiftIndex + shiftCount + 1) % 3;
+                    const shift = shifts[nextShiftIndex];
+
+                    if (nextShiftIndex === 0) {
+                        shiftDate = new Date(shiftDate);
+                        shiftDate.setDate(shiftDate.getDate() + 1);
+                    }
+
+                    let shiftDateStr = shiftDate.toISOString().split('T')[0];
+                    if (isHoliday(shiftDateStr) || shiftDate.getDay() === 0 || shiftDate.getDay() === 6) {
+                        shiftDate = getNextWorkingDay(shiftDate);
+                        shiftDateStr = shiftDate.toISOString().split('T')[0];
+                    }
+
+                    shiftDate.setHours(shift.start, 0, 0, 0);
+
+                    freeShifts.push({
+                        name: shift.name,
+                        label: shift.label,
+                        startTime: new Date(shiftDate),
+                        endTime: new Date(shiftDate.getTime() + (shift.end > shift.start ? 
+                            (shift.end - shift.start) : (24 - shift.start + shift.end)) * 60 * 60 * 1000)
+                    });
+
+                    shiftCount++;
+                }
+
+                let resultHTML = `
+                    <div class="shift-timings">
+                        <h4>Standard Shift Timings:</h4>
+                        <ul>
+                            ${shifts.map(s => `<li><strong>${s.name}:</strong> ${s.label}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <h3>Vessel Completion Time Analysis</h3>
+                    <p>Your cargo vessel completes during: <strong>${shifts[currentShiftIndex].label}</strong></p>
+                    <p>The next 7 days (21 shifts) free for stack delivery are:</p>
+                    <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                        <tr>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Shift</th>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Timing</th>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Date</th>
+                            <th style="padding:8px; text-align:left; background:#3498db; color:white;">Status</th>
+                        </tr>
+                `;
+
+                freeShifts.forEach((shift, index) => {
+                    const dateStr = shift.startTime.toISOString().split('T')[0];
+                    const timeRange = `${shift.startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${shift.endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    const priority = index < 7 ? "First Priority" : index < 14 ? "Secondary Option" : "Last Resort";
+                    const priorityColor = index < 7 ? "color:#27ae60;" : index < 14 ? "color:#f39c12;" : "color:#e74c3c;";
+                    const isHolidayFlag = isHoliday(dateStr) ? " (Holiday)" : "";
+
+                    resultHTML += `
+                        <tr>
+                            <td style="padding:8px; border-bottom:1px solid #ddd;">${shift.name}</td>
+                            <td style="padding:8px; border-bottom:1px solid #ddd;">${shift.label}</td>
+                            <td style="padding:8px; border-bottom:1px solid #ddd;">${dateStr}${isHolidayFlag}</td>
+                            <td style="padding:8px; border-bottom:1px solid #ddd; ${priorityColor}">
+                                <strong>${priority}</strong>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                resultHTML += `
+                    </table>
+                    <div style="margin-top:15px; padding:10px; background:#f8f9fa; border-radius:6px;">
+                        <p style="margin:0; font-size:14px;">
+                            <strong>Note:</strong> The vessel completion shift (${shifts[currentShiftIndex].label}) is not counted. 
+                            The next 21 shifts (7 days) are free for stack delivery scheduling.
+                        </p>
+                    </div>
+                `;
+
+                stackShiftResult.innerHTML = resultHTML;
+            } catch (error) {
+                console.error('Stack shift calculation error:', error.message);
+                const stackShiftResult = document.getElementById('stackShiftResult');
+                if (stackShiftResult) {
+                    stackShiftResult.innerHTML = `<p class="error-message">Error calculating stack shifts: ${error.message}</p>`;
+                }
+            }
+        }
+        
+        // Validate storage details before submission
+        function validateStorageDetails() {
+            let isValid = true;
+            try {
+                const storageType = document.getElementById('storageType');
+                const containerSize = document.getElementById('containerSize');
+                const numContainers = document.getElementById('numContainers');
+                const estimatedStorageEnd = document.getElementById('estimatedStorageEnd');
+                const now = new Date('2025-07-04T10:40:00+05:30');
+
+                if (!storageType.value) {
+                    document.getElementById('storageTypeError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('storageTypeError').style.display = 'none';
+                }
+
+                if (!containerSize.value) {
+                    document.getElementById('containerSizeError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('containerSizeError').style.display = 'none';
+                }
+
+                if (!numContainers.value || numContainers.value < 1) {
+                    document.getElementById('numContainersError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('numContainersError').style.display = 'none';
+                }
+
+                if (!estimatedStorageEnd.value) {
+                    document.getElementById('estimatedStorageEndError').style.display = 'block';
+                    isValid = false;
+                } else {
+                    const endDate = new Date(estimatedStorageEnd.value);
+                    if (isNaN(endDate.getTime()) || endDate < now) {
+                        document.getElementById('estimatedStorageEndError').style.display = 'block';
+                        isValid = false;
+                    } else {
+                        document.getElementById('estimatedStorageEndError').style.display = 'none';
+                    }
+                }
+
+                return isValid;
+            } catch (error) {
+                console.error('Storage validation error:', error.message);
+                alert('An error occurred during storage details validation: ' + error.message);
+                return false;
+            }
+        }
+
+        // Form submission
+        function submitForm() {
+            try {
+                if (!validateStorageDetails()) {
+                    throw new Error('Please complete all required fields in Storage Details');
+                }
+
+                const port = document.getElementById('port').value === 'other' 
+                    ? document.getElementById('otherPort').value 
+                    : document.getElementById('port').options[document.getElementById('port').selectedIndex].text;
+                const cargoData = {
+                    port: port,
+                    cargoReference: document.getElementById('cargoRef').value,
+                    cargoType: document.getElementById('cargoType').value,
+                    deliveryType: document.getElementById('deliveryType').value,
+                    landingTime: document.getElementById('landingDateTime')?.value || '',
+                    vesselCompletionTime: document.getElementById('vesselCompletionTime')?.value || '',
+                    stackLocation: document.getElementById('stackLocation')?.value || '',
+                    storageType: document.getElementById('storageType').value,
+                    containerSize: document.getElementById('containerSize').value,
+                    numContainers: document.getElementById('numContainers').value,
+                    freeShifts: document.getElementById('deliveryType').value === 'direct' 
+                        ? (document.getElementById('shiftResult')?.innerText ? "Calculated direct delivery shifts displayed" : "Not calculated")
+                        : (document.getElementById('stackShiftResult')?.innerText ? "Calculated stack delivery shifts displayed" : "Not calculated"),
+                    storageCost: document.getElementById('storageCostResult')?.innerText?.match(/\d+(,\d+)?/)?.[0]?.replace(',', '') || '0',
+                    storageEnd: document.getElementById('estimatedStorageEnd').value
+                };
+
+                console.log('Submitting cargo data:', cargoData);
+                alert('Cargo details submitted successfully!');
+            } catch (error) {
+                console.error('Submission error:', error.message);
+                alert('An error occurred during submission: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
